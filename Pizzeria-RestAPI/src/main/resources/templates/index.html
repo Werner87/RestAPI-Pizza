@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <title>Pizzeria</title>
+</head>
+<body>
+<h1>Menu</h1>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Cena</th>
+    </tr>
+</table>
+
+<h2>Dodaj nową pizze</h2>
+<form method="post" action="/api/pizzas">
+    <label for="name">Nazwa:</label>
+    <input type="text" id="name" name="name"><br><br>
+    <label for="description">Opis:</label>
+    <textarea id="description" name="description"></textarea><br><br>
+    <label for="price">Cena:</label>
+    <input type="number" id="price" name="price" step="0.01"><br><br>
+    <input type="submit" value="Add Pizza">
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Pobierz menu pizzy przy załadowaniu strony
+        $.get("/api/pizzas", function(data) {
+            var tableBody = "";
+            $.each(data, function(index, pizza) {
+                tableBody += "<tr>" +
+                    "<td>" + pizza.name + "</td>" +
+                    "<td>" + pizza.description + "</td>" +
+                    "<td>" + pizza.price + "</td>" +
+                    "</tr>";
+            });
+            $("table").append(tableBody);
+        });
+
+        // Dodaj nową pizzę po zatwierdzeniu formularza
+        $("form").submit(function(event) {
+            event.preventDefault();
+
+            var name = $("#name").val();
+            var description = $("#description").val();
+            var price = $("#price").val();
+
+            var pizzaData = {
+                "name": name,
+                "description": description,
+                "price": price
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/api/pizzas",
+                contentType: "application/json",
+                data: JSON.stringify(pizzaData),
+                success: function(response) {
+                    // Dodaj nową pizzę do tabeli
+                    var newRow = "<tr>" +
+                        "<td>" + response.name + "</td>" +
+                        "<td>" + response.description + "</td>" +
+                        "<td>" + response.price + "</td>" +
+                        "</tr>";
+                    $("table").append(newRow);
+
+                    // Wyczyść formularz
+                    $("#name").val("");
+                    $("#description").val("");
+                    $("#price").val("");
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
